@@ -1,0 +1,177 @@
+var request = require("request")
+var url = require("url")
+
+module.exports = function(api_secret, marketplace_id) {
+
+  if (api_secret === null){throw new Error("missing required api_secret")}
+  if (marketplace_id === null){throw new Error("missing required marketplace_id")}
+
+  var client = function(method, uri, json, cb) {
+
+    //make json param optional
+    if(typeof json === 'function' && cb === undefined){cb = json; json = null}
+
+    request({
+      method: method,
+      uri: url.format({protocol: "https", host: "api.balancedpayments.com", auth: api_secret+":", pathname: uri}),
+      encoding: "utf-8",
+      json: json || true
+    }, function(err, response, body) {
+      if (response.statusCode >= 400){
+
+        if(body !== undefined){
+          err = new Error("Balanced call failed: "+response.statusCode+" - "+body.response)
+        }else{
+          err = new Error("Balanced call failed: "+response.statusCode)
+        }
+      }
+
+      cb(err, body)
+      
+    })
+  }
+
+  return balanced = {
+
+    client: client,
+
+    account: {
+
+      //creates a new balanced account
+      create: function(account, cb){
+
+        //the ability to pass in bank/card info and auto-token + add will be created soon
+
+        client("POST", "/v1/marketplaces/"+marketplace_id+"/accounts", account, cb)
+
+      },
+
+      //adds a card to their account
+      add_card: function(account_id, card_info_or_id, cb){
+
+
+        var add_to_account = function(card_id){
+          var card_uri = "/v1/marketplaces/"+marketplace_id+"/cards/"+card_id
+          client("PUT", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id, {card_uri:card_uri}, cb)
+        }
+
+        var create_card_id = function(card_info){
+          client("POST", "/v1/marketplaces/"+marketplace_id+"/cards", card_info, function(err, res){
+            if(err){ cb(err) }else{ add_to_account(res.id) }
+          })
+        }
+
+        if(typeof card_info_or_id === "object"){ 
+          create_card_id(card_info_or_id)
+        }else{ 
+          add_to_account(card_info_or_id) 
+        }
+        
+
+      },
+
+      //debits the accounts card 
+      debit: function(account_id, debit, cb){
+
+        client("POST", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id+"/debits", debit, cb)
+
+      },
+
+      //puts a hold on the accounts card
+      hold: function(account_id, hold, cb){
+
+        client("POST", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id+"/holds", hold, cb)
+
+      },
+
+      //adds a bank account to this account
+      add_bank: function(account_id, bank_info_or_id, cb){
+
+        var add_to_account = function(bank_id){
+          var bank_account_uri = "/v1/marketplaces/"+marketplace_id+"/bank_accounts/"+bank_id
+          client("PUT", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id, {bank_account_uri:bank_account_uri}, cb)
+        }
+
+        var create_bank_id = function(bank_info){
+          client("POST", "/v1/marketplaces/"+marketplace_id+"/bank_accounts", bank_info, function(err, res){
+            if(err){ cb(err) }else{ add_to_account(res.id) }
+          })
+        }
+
+        if(typeof bank_info_or_id === "object"){ 
+          create_bank_id(bank_info_or_id)
+        }else{ 
+          add_to_account(bank_info_or_id) 
+        }
+
+      },
+
+      //credits accounts bank account
+      credit: function(account_id, credit, cb){
+
+        client("POST", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id+"/credits", credit, cb)
+
+      },
+
+      //adds extra deatils for underwriting purposes
+      underwrite: function(account_id, underwriting_info, cb){
+
+        client("PUT", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id, {merchant: underwriting_info}, cb)
+
+      },
+
+      //returns account details
+      get: function(account_id, cb){
+
+        client("GET", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id, cb)
+
+      },
+
+      //returns object of recent credits and debits for the account
+      transactions: function(account_id, cb){
+
+        client("GET", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id+"/transactions", cb)
+
+      }
+    },
+
+    marketplace: {
+
+      //returns list of accounts for the marketplace  
+      accounts: function(cb){
+
+        client("GET", "/v1/marketplaces/"+marketplace_id+"/accounts", cb)
+
+      },
+
+      //returns list of debits for the marketplace
+      debits: function(cb){
+
+        client("GET", "/v1/marketplaces/"+marketplace_id+"/debits", cb)
+
+      },
+
+       //returns list of credits for the marketplace
+      credits: function(cb){
+
+        client("GET", "/v1/marketplaces/"+marketplace_id+"/credits", cb)
+
+      },
+
+       //returns list of refunds for the marketplace
+      refunds: function(cb){
+
+        client("GET", "/v1/marketplaces/"+marketplace_id+"/refunds", cb)
+
+      },
+
+       //returns list of holds for the marketplace
+      holds: function(cb){
+
+        client("GET", "/v1/marketplaces/"+marketplace_id+"/holds", cb)
+
+      }
+
+    }
+  }
+}

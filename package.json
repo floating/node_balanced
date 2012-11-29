@@ -1,0 +1,22 @@
+{
+  "name": "balanced",
+  "version": "0.0.0",
+  "description": "Balanced Payments for Node",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha -R spec --timeout 10000 tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/floating/balanced.git"
+  },
+  "keywords": [
+    "balanced",
+    "payments"
+  ],
+  "author": "cjm",
+  "license": "BSD",
+  "dependencies": {
+    "request": "~2.12.0"
+  }
+}
