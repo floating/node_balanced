@@ -47,7 +47,7 @@ The callback is called with an error (if any) and then the response body (if any
 
 ## Tests
 
-To run the tests, install mocha with `npm install mocha -g`, make sure your test account has balance above $5, then run
+To run the tests, install mocha with `npm install mocha -g`, then run
 
 `BALANCED_API_SECRET=your_test_api_secret BALANCED_MARKETPLACE_ID=your_test_marketplace_id npm test`
 
