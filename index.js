@@ -19,6 +19,8 @@ module.exports = function(api_secret, marketplace_id) {
     }, function(err, response, body) {
       if (response.statusCode >= 400){
 
+        console.log(response)
+
         if(body !== undefined){
           err = new Error("Balanced call failed: "+response.statusCode+" - "+body.response)
         }else{
@@ -40,8 +42,6 @@ module.exports = function(api_secret, marketplace_id) {
       //creates a new balanced account
       create: function(account, cb){
 
-        //the ability to pass in bank/card info and auto-token + add will be created soon
-
         client("POST", "/v1/marketplaces/"+marketplace_id+"/accounts", account, cb)
 
       },
@@ -49,23 +49,13 @@ module.exports = function(api_secret, marketplace_id) {
       //adds a card to their account
       add_card: function(account_id, card_info_or_id, cb){
 
-        var add_to_account = function(card_id){
-          var card_uri = "/v1/marketplaces/"+marketplace_id+"/cards/"+card_id
-          client("PUT", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id, {card_uri:card_uri}, cb)
-        }
-
-        var create_card_id = function(card_info){
-          client("POST", "/v1/marketplaces/"+marketplace_id+"/cards", card_info, function(err, res){
-            if(err){ cb(err) }else{ add_to_account(res.id) }
-          })
-        }
-
         if(typeof card_info_or_id === "object"){ 
-          create_card_id(card_info_or_id)
+          var card = {card:card_info_or_id}
         }else{ 
-          add_to_account(card_info_or_id) 
+          var card = {card_uri:"/v1/marketplaces/"+marketplace_id+"/cards/"+card_info_or_id}
         }
         
+        client("PUT", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id, card, cb) 
 
       },
 
@@ -86,22 +76,13 @@ module.exports = function(api_secret, marketplace_id) {
       //adds a bank account to this account
       add_bank: function(account_id, bank_info_or_id, cb){
 
-        var add_to_account = function(bank_id){
-          var bank_account_uri = "/v1/marketplaces/"+marketplace_id+"/bank_accounts/"+bank_id
-          client("PUT", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id, {bank_account_uri:bank_account_uri}, cb)
-        }
-
-        var create_bank_id = function(bank_info){
-          client("POST", "/v1/marketplaces/"+marketplace_id+"/bank_accounts", bank_info, function(err, res){
-            if(err){ cb(err) }else{ add_to_account(res.id) }
-          })
-        }
-
         if(typeof bank_info_or_id === "object"){ 
-          create_bank_id(bank_info_or_id)
+          var bank = {bank_account:bank_info_or_id}
         }else{ 
-          add_to_account(bank_info_or_id) 
+          var bank = {bank_account_uri:"/v1/marketplaces/"+marketplace_id+"/bank_accounts/"+bank_info_or_id}
         }
+
+        client("PUT", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id, bank, cb) 
 
       },
 
