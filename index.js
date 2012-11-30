@@ -19,8 +19,6 @@ module.exports = function(api_secret, marketplace_id) {
     }, function(err, response, body) {
       if (response.statusCode >= 400){
 
-        console.log(response)
-
         if(body !== undefined){
           err = new Error("Balanced call failed: "+response.statusCode+" - "+body.response)
         }else{
