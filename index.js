@@ -3,8 +3,8 @@ var url = require("url")
 
 module.exports = function(api_secret, marketplace_id) {
 
-  if (api_secret === null){throw new Error("missing required api_secret")}
-  if (marketplace_id === null){throw new Error("missing required marketplace_id")}
+  if (api_secret === undefined){throw new Error("missing required api_secret")}
+  if (marketplace_id === undefined){throw new Error("missing required marketplace_id")}
 
   var client = function(method, uri, json, cb) {
 
@@ -48,7 +48,6 @@ module.exports = function(api_secret, marketplace_id) {
 
       //adds a card to their account
       add_card: function(account_id, card_info_or_id, cb){
-
 
         var add_to_account = function(card_id){
           var card_uri = "/v1/marketplaces/"+marketplace_id+"/cards/"+card_id
