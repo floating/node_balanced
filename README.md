@@ -11,21 +11,26 @@ The [Balanced](https://balancedpaymnets.com/) [API](https://balancedpayments.com
 
   var balanced = require('balanced')(api_secret, marketplace_id)
 
-  balanced.account.create({email_address: 'test@test.com'}, function(err, res){
-    if (err) {
-      console.log("Error creating account.")
-      return console.log(err)
-    }
+  //any inital account info - see documentation for all possible params
+  account = {email_address: 'test@test.com'}
+
+  balanced.account.create(account, function(err, res){
+
+    //make sure there were no errors
+    if (err) { return console.log(err) }
+
+    //account created
     console.log("account_id: "+res.id)
+
   })
 
 ```
 
 ## API
 
-All methods take a callback as their last parameter. 
+All methods take a callback as their last parameter, it's called with an error, if any, and the response body, if any.
 
-The callback is called with an error (if any) and then the response body (if any). `cb(err, res)`
+`cb(err, res)`
 
 * `balanced`
   * `.account`
@@ -47,7 +52,7 @@ The callback is called with an error (if any) and then the response body (if any
 
 ## Tests
 
-To run the tests, install mocha with `npm install mocha -g`, then run `npm test`
+Install mocha with `npm install mocha -g`, then run `npm test`.
 
 ## Author
 
