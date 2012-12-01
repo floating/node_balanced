@@ -29,7 +29,7 @@ The callback is called with an error (if any) and then the response body (if any
 
 * `balanced`
   * `.account`
-      * `.create(email, cb)` - creates a new balanced account, takes bank/card info/tokens in options
+      * `.create(account, cb)` - creates a new balanced account, takes bank/card info/tokens in options
       * `.add_card(account_id, card_info_or_id, cb)` - adds a card to their account
       * `.debit(account_id, debit, cb)` - debits the accounts card
       * `.hold(account_id, hold, cb) ` - puts a hold on the accounts card
@@ -47,9 +47,7 @@ The callback is called with an error (if any) and then the response body (if any
 
 ## Tests
 
-To run the tests, install mocha with `npm install mocha -g`, then run
-
-`BALANCED_API_SECRET=your_test_api_secret BALANCED_MARKETPLACE_ID=your_test_marketplace_id npm test`
+To run the tests, install mocha with `npm install mocha -g`, then run `npm test`
 
 ## Author
 

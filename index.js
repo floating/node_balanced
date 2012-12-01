@@ -31,11 +31,9 @@ module.exports = function(api_secret, marketplace_id) {
     })
   }
 
-  return balanced = {
-
-    client: client,
-
-    account: {
+  return {
+    
+     account: {
 
       //creates a new balanced account
       create: function(account, cb){

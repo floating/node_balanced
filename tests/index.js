@@ -1,64 +1,101 @@
-if (!process.env.BALANCED_API_SECRET || !process.env.BALANCED_MARKETPLACE_ID) {
-  console.log("You must have environment variables BALANCED_API_SECRET and BALANCED_MARKETPLACE_ID set with test data.\n")
-  console.log("ex: BALANCED_API_SECRET=[your_test_api_secret] BALANCED_MARKETPLACE_ID=[your_test_marketplace_id] npm test\n")
-  process.exit(2) 
-}
+var request = require("request")
+var url = require("url")
+var assert = require("assert")
 
-var balanced = require("../index")(process.env.BALANCED_API_SECRET, process.env.BALANCED_MARKETPLACE_ID);
-var assert = require("assert");
+var api_secret = null
+var marketplace_id = null
+var balanced = null
+var test = {}
 
+var client = function(method, uri, json, cb) {
 
-var test = {
-  email: function(){ return Math.random()+'test@testing.com' },
-  card_info: {
-    card_number: "5105105105105100",
-    expiration_month: "12",
-    expiration_year: "2020",
-    security_code: "123"
-  },
-  bank_info: {
-    name: "Johann Bernoulli",
-    account_number: "9900000001",
-    routing_number: "121000358",
-    type: "checking"
+  //make json param optional
+  if(typeof json === 'function' && cb === undefined){cb = json; json = null}
+
+  if(api_secret){
+    uri = url.format({protocol: "https", host: "api.balancedpayments.com", auth: api_secret+':', pathname: uri})
+  }else{
+    uri = url.format({protocol: "https", host: "api.balancedpayments.com", pathname: uri})
   }
+
+  request({
+    method: method,
+    uri: uri,
+    encoding: "utf-8",
+    json: json || true
+  }, function(err, response, body) {
+    if (response.statusCode >= 400){
+
+      if(body !== undefined){
+        err = new Error("Balanced call failed: "+response.statusCode+" - "+body.response)
+      }else{
+        err = new Error("Balanced call failed: "+response.statusCode)
+      }
+    }
+
+    cb(err, body)
+    
+  })
 }
+
 
 before(function(done){
 
-  var count = 0
-  var track = function(){if(++count === 2){done()}}
+  //create a marketplace
+  client("POST", "/v1/api_keys", function(err, res){
+    if(err){return done(err)}
 
-  var marketplace_id = process.env.BALANCED_MARKETPLACE_ID
+    //set the api secret
+    api_secret = res.secret
 
-  //create a token
-  balanced.client("POST", "/v1/marketplaces/"+marketplace_id+"/cards", {
-    card_number: "5105105105105100",
-    expiration_month: "12",
-    expiration_year: "2015",
-    security_code: "123"
-  }, function(err, res){
-    if(err){ 
-      done(err) 
-    }else{ 
-      test.card_id = res.id 
-      track()
-    }
+    client("POST", "/v1/marketplaces", function(err, res){
+      if(err){return done(err)}
+
+      marketplace_id = res.id
+
+      test.email = function(){ return Math.random()+'test@testing.com' }
+      test.card_info = {card_number: "5105105105105100", expiration_month: "12", expiration_year: "2020", security_code: "123"}
+      test.bank_info = {name: "Johann Bernoulli", account_number: "9900000001", routing_number: "121000358", type: "checking"}
+
+      var count = 0
+      var track = function(){
+        if(++count === 2){
+          balanced = require("../index")(api_secret, marketplace_id)
+          done()
+        }
+      }
+      //create a card token
+      client("POST", "/v1/marketplaces/"+marketplace_id+"/cards", {
+        card_number: "5105105105105100",
+        expiration_month: "12",
+        expiration_year: "2015",
+        security_code: "123"
+      }, function(err, res){
+        if(err){ 
+          done(err) 
+        }else{ 
+          test.card_id = res.id 
+          track()
+        }
+      })
+      //create bank token
+      client("POST", "/v1/bank_accounts", test.bank_info, function(err, res){
+        if(err){ 
+          done(err) 
+        }else{ 
+          test.bank_id = res.id 
+          track()
+        }
+      })
+    })
   })
-
-  //create bank token
-  balanced.client("POST", "/v1/bank_accounts", test.bank_info, function(err, res){
-    if(err){ 
-      done(err) 
-    }else{ 
-      test.bank_id = res.id 
-      track()
-    }
-  })
-
 })
 
 
+
+
+
+//TESTS
 describe('balanced', function(){
 
 
