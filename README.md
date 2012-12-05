@@ -1,6 +1,6 @@
 #node_balanced
 
-The [Balanced](https://balancedpaymnets.com/) [API](https://balancedpayments.com/docs/api) for Node.
+The [Balanced API](https://balancedpayments.com/docs/api) for Node.
 
 ## Installation
 
