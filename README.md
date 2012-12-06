@@ -30,19 +30,19 @@ The [Balanced API](https://balancedpayments.com/docs/api) for Node.
 
 All methods take a callback as their last parameter, it's called with an error, if any, and the response body, if any.
 
-`cb(err, res)`
+`cb = function(err, res){ //the response from balanced }`
 
 * `balanced`
   * `.account`
-      * `.create(account, cb)` - creates a new balanced account, takes bank/card info/tokens in options
+      * `.create(account, cb)` - creates a new balanced account, takes bank/card info/ids in options
       * `.add_card(account_id, card_info_or_id, cb)` - adds a card to their account
-      * `.debit(account_id, debit, cb)` - debits the accounts card
-      * `.hold(account_id, hold, cb) ` - puts a hold on the accounts card
+      * `.debit(account_id, debit, cb)` - debits the account's card
+      * `.hold(account_id, hold, cb) ` - puts a hold on the account's card
       * `.add_bank(account_id, bank_info_or_id, cb)` - adds a bank account to this account
-      * `.credit(account_id, credit, cb)` - credits accounts bank account
+      * `.credit(account_id, credit, cb)` - credits account's bank account
       * `.underwrite(account_id, underwriting_info, cb)` - adds extra deatils for underwriting purposes
       * `.get(account_id, cb)` - returns account details
-      * `.transactions(account_id, cb)` - returns object of recent credits and debits for the account
+      * `.transactions(account_id, cb)` - returns object of credits and debits for the account
   * `.marketplace`
       * `.accounts(cb)` - get all of the marketplace's accounts
       * `.debits(cb)` - get all of the marketplace's debits
@@ -56,7 +56,7 @@ Install mocha with `npm install mocha -g`, then run `npm test`.
 
 ## Author
 
-C. Jordan Muir (cjm712@gmail.com). Development sponsored by [HashPay](https://hashpay.com/).
+C. Jordan Muir (cjm712@gmail.com), development sponsored by [HashPay](https://hashpay.com/).
 
 ## License
 
