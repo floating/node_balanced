@@ -12,7 +12,7 @@ The [Balanced API](https://balancedpayments.com/docs/api) for Node.
   var balanced = require('balanced')(api_secret, marketplace_id)
 
   //any inital account info - see documentation for all possible params
-  account = {email_address: 'test@test.com'}
+  var account = {email_address: 'test@test.com'}
 
   balanced.account.create(account, function(err, res){
 
