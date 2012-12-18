@@ -34,6 +34,7 @@ All methods take a callback as their last parameter, it's called with an error, 
 
 * `balanced`
   * `.account`
+      * `.getId(uri)` - returns the account ID from an account URI
       * `.create(account, cb)` - creates a new balanced account, takes bank/card info/ids in options
       * `.add_card(account_id, card_info_or_id, cb)` - adds a card to their account
       * `.debit(account_id, debit, cb)` - debits the account's card
@@ -44,6 +45,7 @@ All methods take a callback as their last parameter, it's called with an error, 
       * `.get(account_id, cb)` - returns account details
       * `.transactions(account_id, cb)` - returns object of credits and debits for the account
   * `.marketplace`
+      * `.getId(uri)` - returns the marketplace ID from a marketplace URI
       * `.accounts(cb)` - get all of the marketplace's accounts
       * `.debits(cb)` - get all of the marketplace's debits
       * `.credits(cb)` - get all of the marketplace's credits
