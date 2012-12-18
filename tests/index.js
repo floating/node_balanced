@@ -328,6 +328,18 @@ describe('balanced', function(){
 
     })
 
+    describe('.getId', function(done){
+
+      it('should get the marketplace ID from the URI', function(done) {
+
+        var id =balanced.marketplace.getId("/v1/marketplaces/"+marketplace_id+"/accounts")
+        assert.equal(id, marketplace_id, "marketplace id is incorrect")
+
+        done()
+      })
+
+    })
+
     describe('.debits', function(done){
 
       it('should get all the debits/credits this account', function(done){

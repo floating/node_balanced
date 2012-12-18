@@ -128,6 +128,21 @@ module.exports = function(api_secret, marketplace_id) {
 
     marketplace: {
 
+      //Get the account ID from the URI
+      getId: function(uri){
+        if(typeof(uri) !== "string"){
+          return false
+        }
+
+        var matches = uri.match(/\/v1\/marketplaces\/([^\/\?]+)/)
+
+        if(matches.length === 2){
+          return matches[1]
+        } else {
+          return false
+        }
+      },
+
       //returns list of accounts for the marketplace  
       accounts: function(cb){
 
