@@ -33,6 +33,7 @@ module.exports = function(api_secret, marketplace_id) {
 
   return {
     account: require(__dirname + "/lib/account.js")(client, marketplace_id, api_secret),
-    marketplace: require(__dirname + "/lib/marketplace.js")(client, marketplace_id, api_secret)
+    marketplace: require(__dirname + "/lib/marketplace.js")(client, marketplace_id, api_secret),
+    card: require(__dirname + "/lib/card.js")(client, marketplace_id, api_secret)
   }
 };
