@@ -42,6 +42,21 @@ module.exports = function(api_secret, marketplace_id) {
 
       },
 
+      //Get the account ID from the URI
+      getId: function(uri){
+        if(typeof(uri) !== "string"){
+          return false
+        }
+
+        var matches = uri.match(/\/v1\/marketplaces\/[^\/]+\/accounts\/([^\/\?]+)/)
+
+        if(matches.length === 2){
+          return matches[1]
+        } else {
+          return false
+        }
+      },
+
       //adds a card to their account
       add_card: function(account_id, card_info_or_id, cb){
 
