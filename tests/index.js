@@ -121,6 +121,18 @@ describe('balanced', function(){
 
     })
 
+    describe('.getId', function() {
+
+      it('should get the balanced account ID from the URL', function(done) {
+
+        var id = balanced.account.getId("/v1/marketplaces/"+marketplace_id+"/accounts/"+test.account_id)
+        assert.equal(id, test.account_id, "account_id is incorrect")
+
+        done()
+      })
+
+    })
+
     describe('.add_card (w/id)', function(){
 
       it('should add a card to the account with a id as input', function(done){
@@ -312,6 +324,18 @@ describe('balanced', function(){
           done()
 
         })
+      })
+
+    })
+
+    describe('.getId', function(done){
+
+      it('should get the marketplace ID from the URI', function(done) {
+
+        var id =balanced.marketplace.getId("/v1/marketplaces/"+marketplace_id+"/accounts")
+        assert.equal(id, marketplace_id, "marketplace id is incorrect")
+
+        done()
       })
 
     })
