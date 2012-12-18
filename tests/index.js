@@ -378,4 +378,109 @@ describe('balanced', function(){
 
 
   })
+  
+  describe('.card', function(){
+
+    var card_id
+
+    describe('.tokenize', function(done) {
+
+      it('should tokenize a card', function(done) {
+
+          var card_info = {
+            card_number: "4111111111111111",
+            expiration_year: 2020,
+            expiration_month: 12,
+            security_code: 123,
+            name: "Node Balanced"
+          }
+
+          balanced.card.tokenize(card_info, function(err, res){
+
+          assert.equal(err, null, err)
+          assert.notEqual(res.id, null, "card_id is null")
+
+          card_id = res.id
+
+          done()
+
+        })
+
+      })
+
+    })
+
+    describe('.getId', function(done){
+
+      it('should get the ID of a card from the URI', function(done){
+
+        var id = balanced.card.getId("/v1/marketplaces/"+marketplace_id+"/cards/"+card_id)
+        assert.equal(id, card_id, "unassociated card id is incorrect")
+        id = balanced.card.getId("/v1/marketplaces/"+marketplace_id+"/accounts/"+test.account_id+"/cards/"+card_id)
+        assert.equal(id, card_id, "associated card id is incorrect")
+
+        done()
+
+      })
+
+    })
+
+    describe('.get', function(done) {
+
+      it('should retrieve a card', function(done){
+
+        balanced.card.get(card_id, function(err, res){
+
+          assert.equal(err, null, err)
+          assert.notEqual(res.id, null, "card_id is null")
+          assert.equal(res.id, card_id, "card_id is incorrect")
+
+          done()
+
+        })
+
+      })
+
+    })
+
+    describe('.update', function(done) {
+
+      it('should update the metadata of a card', function(done) {
+
+        balanced.card.update(card_id, {"test": "tester"}, function(err, res) {
+
+          assert.equal(err, null, err)
+          assert.notEqual(res.id, null, "card_id is null")
+          assert.equal(res.id, card_id, "card_id is incorrect")
+          assert.equal(res.meta.test, "tester", "metadata is incorrect")
+
+          done()
+
+        })
+
+      })
+
+    })
+
+    describe('.associate', function(done) {
+
+      it('should associate a card with an account', function(done){
+
+        balanced.card.associate(card_id, test.account_id, function(err, res){
+
+          assert.equal(err, null, err)
+          assert.notEqual(res.id, null, "card_id is null")
+          assert.equal(res.id, card_id, "card_id is incorrect")
+          assert.equal(res.account.id, test.account_id, "account_id is incorrect")
+
+          done()
+
+        })
+
+      })
+
+    })
+
+  })
+
 })
