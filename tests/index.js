@@ -305,8 +305,6 @@ describe('balanced', function(){
           assert.equal(res.cards.length > 0, true, "res.cards doesn't have any content")
           assert.equal(res.bank_accounts.length > 0, true, "res.bank_accounts doesn't have any content")
 
-          console.log(res)
-
           done()
 
         })
