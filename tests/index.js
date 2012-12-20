@@ -122,18 +122,29 @@ before(function(done){
 describe('balanced', function(){
 
   //GLOBAL
-  describe('.getId', function(done){
+  describe('.getId', function(){
 
     var testURI = "/v1/marketplaces/TEST-MP6cl1VoBnJWpjxzJspa6h4K/accounts/AC6cns438ARcVrzYKO71cw9Y/refunds/12345"
 
-    it('should get a marketplace ID', function(){
+    it('should get a marketplace ID', function(done){
       var marketId = getId(testURI, 'marketplace')
       assert.equal(marketId, "TEST-MP6cl1VoBnJWpjxzJspa6h4K", "marketplace id is incorrect")
+
+      done()
     })
 
-    it('should not get a nonsense ID', function(){
+    it('should not get a nonsense ID', function(done){
       var nonsenseId = getId(testURI, 'nonsense')
       assert.equal(nonsenseId, false, 'nonsense ID returned something')
+
+      done()
+    })
+
+    it('should return a base ID', function(done){
+      var baseId = getId("TEST-MP6cl1VoBnJWpjxzJspa6h4K", "marketplace")
+      assert.equal(baseId, "TEST-MP6cl1VoBnJWpjxzJspa6h4K", "base marketplace id is incorrect")
+
+      done()
     })
 
   })

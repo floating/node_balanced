@@ -3,9 +3,6 @@ var url = require("url")
 
 module.exports = function(api_secret, marketplace_id) {
 
-  if (api_secret === undefined){throw new Error("missing required api_secret")}
-  if (marketplace_id === undefined){throw new Error("missing required marketplace_id")}
-
   var client = function(method, uri, json, cb) {
 
     //make json param optional
@@ -54,6 +51,13 @@ module.exports = function(api_secret, marketplace_id) {
     }
   }
 
+
+  if (api_secret === undefined){throw new Error("missing required api_secret")}
+  if (marketplace_id === undefined){throw new Error("missing required marketplace_id")}
+
+  if(!(marketplace_id = getId(marketplace_id, 'marketplace'))){throw new Error('invalid marketplace_id')}
+
+
   return {
     
      account: {
@@ -70,8 +74,11 @@ module.exports = function(api_secret, marketplace_id) {
 
         if(typeof card_info_or_id === "object"){ 
           var card = {card:card_info_or_id}
-        }else{ 
+        }else if(card_info_or_id = getId(card_info_or_id, 'card')){ 
           var card = {card_uri:"/v1/marketplaces/"+marketplace_id+"/cards/"+card_info_or_id}
+        }else{
+          if(typeof(cb) === "function"){cb("Invalid Card Id")}
+          return false
         }
         
         client("PUT", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id, card, cb) 
@@ -81,14 +88,22 @@ module.exports = function(api_secret, marketplace_id) {
       //debits the accounts card 
       debit: function(account_id, debit, cb){
 
-        client("POST", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id+"/debits", debit, cb)
+        if(account_id = getId(account_id, "account")){
+          client("POST", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id+"/debits", debit, cb)
+        }else{
+          if(typeof(cb) === "function"){cb("Invalid account id")}
+        }
 
       },
 
       //puts a hold on the accounts card
       hold: function(account_id, hold, cb){
 
-        client("POST", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id+"/holds", hold, cb)
+        if(account_id = getId(account_id, "account")){
+          client("POST", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id+"/holds", hold, cb)
+        }else{
+          if(typeof(cb) === "function"){cb("Invalid account id")}
+        }
 
       },
 
@@ -97,8 +112,11 @@ module.exports = function(api_secret, marketplace_id) {
 
         if(typeof bank_info_or_id === "object"){ 
           var bank = {bank_account:bank_info_or_id}
-        }else{ 
+        }else if(bank_info_or_id = getId(bank_info_or_id, "bank_account")){ 
           var bank = {bank_account_uri:"/v1/marketplaces/"+marketplace_id+"/bank_accounts/"+bank_info_or_id}
+        }else{
+          if(typeof(cb) === "function"){cb("Invalid bank account")}
+          return false
         }
 
         client("PUT", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id, bank, cb) 
@@ -108,28 +126,44 @@ module.exports = function(api_secret, marketplace_id) {
       //credits accounts bank account
       credit: function(account_id, credit, cb){
 
-        client("POST", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id+"/credits", credit, cb)
+        if(account_id = getId(account_id, "account")){
+          client("POST", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id+"/credits", credit, cb)
+        }else{
+          if(typeof(cb) === "function"){cb("Invalid account id")}
+        }
 
       },
 
       //adds extra deatils for underwriting purposes
       underwrite: function(account_id, underwriting_info, cb){
 
-        client("PUT", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id, {merchant: underwriting_info}, cb)
+        if(account_id = getId(account_id, "account")){
+          client("PUT", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id, {merchant: underwriting_info}, cb)
+        }else{
+          if(typeof(cb) === "function"){cb("Invalid account id")}  
+        }
 
       },
 
       //returns account details
       get: function(account_id, cb){
 
-        client("GET", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id, cb)
+        if(account_id = getId(account_id, "account")){
+          client("GET", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id, cb)
+        }else{
+          if(typeof(cb) === "function"){cb("Invalid account id")}
+        }
 
       },
 
       //returns object of recent credits and debits for the account
       transactions: function(account_id, cb){
 
-        client("GET", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id+"/transactions", cb)
+        if(account_id = getId(account_id, "account")){
+          client("GET", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id+"/transactions", cb)
+        }else{
+          if(typeof(cb) === "function"){cb("Invalid account id")}
+        }
 
       }
     },
