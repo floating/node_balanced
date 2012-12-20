@@ -38,6 +38,29 @@ var client = function(method, uri, json, cb) {
   })
 }
 
+//needle should equal things like "account", "marketplace", "bank_account", etc.
+var getId = function(haystack, needle) {
+
+  //It would appear that we were passed an actual ID, not a URI
+  if(haystack.indexOf("/") < 0){
+    return haystack
+  }
+
+  //All of Balanced's APIs end their resources with an s.  Like "bank_accounts" instead of "bank_account"
+  if(needle.substr(needle.length - 1) !== "s") {
+    needle = needle + "s"
+  }
+
+  var patt = new RegExp("/"+needle+"/([^/]+)")
+  var match = patt.exec(haystack)
+
+  if(match !== null && match.length === 2){
+    return match[1]
+  } else {
+    return false
+  }
+}
+
 
 before(function(done){
 
@@ -97,6 +120,23 @@ before(function(done){
 
 //TESTS
 describe('balanced', function(){
+
+  //GLOBAL
+  describe('.getId', function(done){
+
+    var testURI = "/v1/marketplaces/TEST-MP6cl1VoBnJWpjxzJspa6h4K/accounts/AC6cns438ARcVrzYKO71cw9Y/refunds/12345"
+
+    it('should get a marketplace ID', function(){
+      var marketId = getId(testURI, 'marketplace')
+      assert.equal(marketId, "TEST-MP6cl1VoBnJWpjxzJspa6h4K", "marketplace id is incorrect")
+    })
+
+    it('should not get a nonsense ID', function(){
+      var nonsenseId = getId(testURI, 'nonsense')
+      assert.equal(nonsenseId, false, 'nonsense ID returned something')
+    })
+
+  })
 
 
   //ACCOUNT

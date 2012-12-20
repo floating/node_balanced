@@ -31,6 +31,29 @@ module.exports = function(api_secret, marketplace_id) {
     })
   }
 
+  //needle should equal things like "account", "marketplace", "bank_account", etc.
+  var getId = function(haystack, needle) {
+
+    //It would appear that we were passed an actual ID, not a URI
+    if(haystack.indexOf("/") < 0){
+      return haystack
+    }
+
+    //All of Balanced's APIs end their resources with an s.  Like "bank_accounts" instead of "bank_account"
+    if(needle.substr(needle.length - 1) !== "s") {
+      needle = needle + "s"
+    }
+
+    var patt = new RegExp("/"+needle+"/([^/]+)")
+    var match = patt.exec(haystack)
+
+    if(match !== null && match.length === 2){
+      return match[1]
+    } else {
+      return false
+    }
+  }
+
   return {
     
      account: {
