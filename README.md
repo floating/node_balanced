@@ -43,6 +43,8 @@ All methods take a callback as their last parameter, it's called with an error, 
       * `.underwrite(account_id, underwriting_info, cb)` - adds extra deatils for underwriting purposes
       * `.get(account_id, cb)` - returns account details
       * `.transactions(account_id, cb)` - returns object of credits and debits for the account
+      * `.assets(account_id, options, cb)` - return all cards and bank accounts for the account
+          * `options` _(optional)_ - Accepts `card_limit` and `bank_account_limit` keys
   * `.marketplace`
       * `.accounts(cb)` - get all of the marketplace's accounts
       * `.debits(cb)` - get all of the marketplace's debits
