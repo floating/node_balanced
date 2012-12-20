@@ -108,6 +108,52 @@ module.exports = function(api_secret, marketplace_id) {
 
         client("GET", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id+"/transactions", cb)
 
+      },
+
+      assets: function(account_id, opts, cb){
+
+        if(typeof(opts) !== "object"){
+          cb = opts
+          opts = {}
+        }
+
+        opts.card_limit = opts.card_limit || 10
+        opts.bank_account_limit = opts.bank_account_limit || 10
+
+        var sentinel = 2
+        var completed = 0
+
+        var assets = {}
+        var errors = []
+
+        client("GET", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id+"/cards?limit="+opts.card_limit, function(err, res) {
+          if(err) {
+            errors.push(err);
+          } else {
+            assets.cards = res.items
+          }
+
+          completed++
+
+          if(completed >= sentinel && typeof(cb) === "function") {
+            cb(errors.length > 0 ? errors : false, assets)
+          }
+        })
+
+        client("GET", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id+"/bank_accounts?limit="+opts.bank_account_limit, function(err, res) {
+          if(err) {
+            errors.push(err);
+          } else {
+            assets.bank_accounts = res.items
+          }
+
+          completed++
+
+          if(completed >= sentinel && typeof(cb) === "function") {
+            cb(errors.length >= 0 ? errors : false, assets)
+          }
+        })
+
       }
     },
 
