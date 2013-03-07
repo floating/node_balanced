@@ -1,6 +1,6 @@
 {
   "name": "balanced",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Balanced Payments for Node",
   "main": "index.js",
   "scripts": {
@@ -8,13 +8,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/floating/balanced.git"
+    "url": "git://github.com/netminds/balanced.git"
   },
   "keywords": [
     "balanced",
     "payments"
   ],
-  "author": "cjm",
+  "author": "cjm, contributions by Net Minds, Inc.",
   "license": "BSD",
   "dependencies": {
     "request": "~2.12.0"
