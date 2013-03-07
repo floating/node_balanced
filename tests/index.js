@@ -1,21 +1,21 @@
-var request = require("request")
-var url = require("url")
-var assert = require("assert")
+var request = require("request");
+var url = require("url");
+var assert = require("assert");
 
-var api_secret = null
-var marketplace_id = null
-var balanced = null
-var test = {}
+var api_secret = null;
+var marketplace_id = null;
+var balanced = null;
+var test = {};
 
 var client = function(method, uri, json, cb) {
 
-  //make json param optional
-  if(typeof json === 'function' && cb === undefined){cb = json; json = null}
+  //make json param optional;
+  if(typeof json === 'function' && cb === undefined){cb = json; json = null;}
 
   if(api_secret){
-    uri = url.format({protocol: "https", host: "api.balancedpayments.com", auth: api_secret+':', pathname: uri})
+    uri = url.format({protocol: "https", host: "api.balancedpayments.com", auth: api_secret+':', pathname: uri});
   }else{
-    uri = url.format({protocol: "https", host: "api.balancedpayments.com", pathname: uri})
+    uri = url.format({protocol: "https", host: "api.balancedpayments.com", pathname: uri});
   }
 
   request({
@@ -27,69 +27,69 @@ var client = function(method, uri, json, cb) {
     if (response.statusCode >= 400){
 
       if(body !== undefined){
-        err = new Error("Balanced call failed: "+response.statusCode+" - "+body.response)
+        err = new Error("Balanced call failed: "+response.statusCode+" - "+body.response);
       }else{
-        err = new Error("Balanced call failed: "+response.statusCode)
+        err = new Error("Balanced call failed: "+response.statusCode);
       }
     }
 
-    cb(err, body)
-    
-  })
+    cb(err, body);
+
+  });
 }
 
 
 before(function(done){
 
-  //create a marketplace
+  //create a marketplace;
   client("POST", "/v1/api_keys", function(err, res){
-    if(err){return done(err)}
+    if(err){return done(err);}
 
-    //set the api secret
-    api_secret = res.secret
+    //set the api secret;
+    api_secret = res.secret;
 
     client("POST", "/v1/marketplaces", function(err, res){
-      if(err){return done(err)}
+      if(err){return done(err);}
 
-      marketplace_id = res.id
+      marketplace_id = res.id;
 
-      test.email = function(){ return Math.random()+'test@testing.com' }
+      test.email = function(){ return Math.random()+'test@testing.com'; }
       test.card_info = {card_number: "5105105105105100", expiration_month: "12", expiration_year: "2020", security_code: "123"}
       test.bank_info = {name: "Johann Bernoulli", account_number: "9900000001", routing_number: "121000358", type: "checking"}
 
-      var count = 0
+      var count = 0;
       var track = function(){
         if(++count === 2){
-          balanced = require("../index")(api_secret, marketplace_id)
-          done()
+          balanced = require("../index")(api_secret, marketplace_id);
+          done();
         }
       }
-      //create a card token
+      //create a card token;
       client("POST", "/v1/marketplaces/"+marketplace_id+"/cards", {
         card_number: "5105105105105100",
         expiration_month: "12",
         expiration_year: "2015",
         security_code: "123"
       }, function(err, res){
-        if(err){ 
-          done(err) 
-        }else{ 
-          test.card_id = res.id 
-          track()
+        if(err){
+          done(err);
+        }else{
+          test.card_id = res.id;
+          track();
         }
-      })
-      //create bank token
+      });
+      //create bank token;
       client("POST", "/v1/bank_accounts", test.bank_info, function(err, res){
-        if(err){ 
-          done(err) 
-        }else{ 
-          test.bank_id = res.id 
-          track()
+        if(err){
+          done(err);
+        }else{
+          test.bank_id = res.id;
+          track();
         }
-      })
-    })
-  })
-})
+      });
+    });
+  });
+});
 
 
 
@@ -108,18 +108,18 @@ describe('balanced', function(){
 
         balanced.account.create({email_address: test.email()}, function(err, res){
 
-          assert.equal(err, null, err)
-          assert.notEqual(res.id, null, "account.id is null")
+          assert.equal(err, null, err);
+          assert.notEqual(res.id, null, "account.id is null");
 
           if(res.id){test.account_id = res.id}
-          
-          done()
 
-        })
+          done();
 
-      })
+        });
 
-    })
+      });
+
+    });
 
     describe('.add_card (w/id)', function(){
 
@@ -127,14 +127,14 @@ describe('balanced', function(){
 
         balanced.account.add_card(test.account_id, test.card_id, function(err, res){
 
-          assert.equal(err, null, err)
-          assert.notEqual(res.id, null, "account_id is null")
+          assert.equal(err, null, err);
+          assert.notEqual(res.id, null, "account_id is null");
 
-          done()
+          done();
 
-        })
-      })
-    })
+        });
+      });
+    });
 
     describe('.add_card (w/info)', function(){
 
@@ -142,14 +142,14 @@ describe('balanced', function(){
 
         balanced.account.add_card(test.account_id, test.card_info, function(err, res){
 
-          assert.equal(err, null, err)
-          assert.notEqual(res.id, null, "account_id is null")
+          assert.equal(err, null, err);
+          assert.notEqual(res.id, null, "account_id is null");
 
-          done()
+          done();
 
-        })
-      })
-    })
+        });
+      });
+    });
 
     describe('.debit', function(){
 
@@ -161,14 +161,14 @@ describe('balanced', function(){
           description: 'node_balanced test debit, $10'
         }, function(err, res){
 
-          assert.equal(err, null, err)
-          assert.notEqual(res.id, null, "debit_id is null")
+          assert.equal(err, null, err);
+          assert.notEqual(res.id, null, "debit_id is null");
 
-          done()
+          done();
 
-        })
-      })
-    })
+        });
+      });
+    });
 
 
     describe('.hold', function(){
@@ -179,14 +179,14 @@ describe('balanced', function(){
           amount: 500
         }, function(err, res){
 
-          assert.equal(err, null, err)
-          assert.notEqual(res.id, null, "hold_id is null")
+          assert.equal(err, null, err);
+          assert.notEqual(res.id, null, "hold_id is null");
 
-          done()
+          done();
 
-        })
-      })
-    })
+        });
+      });
+    });
 
 
 
@@ -196,14 +196,14 @@ describe('balanced', function(){
 
         balanced.account.add_bank(test.account_id, test.bank_id, function(err, res){
 
-          assert.equal(err, null, err)
-          assert.notEqual(res.id, null, "account_id is null")
+          assert.equal(err, null, err);
+          assert.notEqual(res.id, null, "account_id is null");
 
-          done()
+          done();
 
-        })
-      })
-    })
+        });
+      });
+    });
 
     describe('.add_bank (w/info)', function(done){
 
@@ -211,15 +211,15 @@ describe('balanced', function(){
 
         balanced.account.add_bank(test.account_id, test.bank_info, function(err, res){
 
-          assert.equal(err, null, err)
-          assert.notEqual(res.id, null, "account_id is null")
+          assert.equal(err, null, err);
+          assert.notEqual(res.id, null, "account_id is null");
 
-          done()
+          done();
 
-        })
-      })
+        });
+      });
 
-    })
+    });
 
     describe('.credit', function(done){
 
@@ -230,15 +230,15 @@ describe('balanced', function(){
           description: 'node_balanced test'
         }, function(err, res){
 
-          assert.equal(err, null, err)
-          assert.notEqual(res.id, null, "account_id is null")
+          assert.equal(err, null, err);
+          assert.notEqual(res.id, null, "account_id is null");
 
-          done()
+          done();
 
-        })
-      })
+        });
+      });
 
-    })
+    });
 
     describe('.underwrite', function(done){
 
@@ -253,15 +253,15 @@ describe('balanced', function(){
           name: "Johann Bernoulli",
         },function(err, res){
 
-          assert.equal(err, null, err)
-          assert.notEqual(res.id, null, "res.id is null")
+          assert.equal(err, null, err);
+          assert.notEqual(res.id, null, "res.id is null");
 
-          done()
+          done();
 
-        })
-      })
+        });
+      });
 
-    })
+    });
 
     describe('.get', function(done){
 
@@ -269,15 +269,15 @@ describe('balanced', function(){
 
         balanced.account.get(test.account_id, function(err, res){
 
-          assert.equal(err, null, err)
-          assert.notEqual(res.id, null, "account_id is null")
+          assert.equal(err, null, err);
+          assert.notEqual(res.id, null, "account_id is null");
 
-          done()
+          done();
 
-        })
-      })
+        });
+      });
 
-    })
+    });
 
     describe('.activity', function(done){
 
@@ -285,16 +285,16 @@ describe('balanced', function(){
 
         balanced.account.transactions(test.account_id, function(err, res){
 
-          assert.equal(err, null, err)
-          assert.notEqual(res.items, null, "res.items is null")
+          assert.equal(err, null, err);
+          assert.notEqual(res.items, null, "res.items is null");
 
-          done()
+          done();
 
-        })
-      })
-    })
+        });
+      });
+    });
 
-  })
+  });
 
 
   //MARKETPLACE
@@ -306,15 +306,15 @@ describe('balanced', function(){
 
         balanced.marketplace.accounts(function(err, res){
 
-          assert.equal(err, null, err)
-          assert.notEqual(res.items, null, "res.items is null")
+          assert.equal(err, null, err);
+          assert.notEqual(res.items, null, "res.items is null");
 
-          done()
+          done();
 
-        })
-      })
+        });
+      });
 
-    })
+    });
 
     describe('.debits', function(done){
 
@@ -322,15 +322,15 @@ describe('balanced', function(){
 
         balanced.marketplace.debits(function(err, res){
 
-          assert.equal(err, null, err)
-          assert.notEqual(res.items, null, "res.items is null")
+          assert.equal(err, null, err);
+          assert.notEqual(res.items, null, "res.items is null");
 
-          done()
+          done();
 
-        })
-      })
+        });
+      });
 
-    })
+    });
 
     describe('.credits', function(done){
 
@@ -338,14 +338,14 @@ describe('balanced', function(){
 
         balanced.marketplace.credits(function(err, res){
 
-          assert.equal(err, null, err)
-          assert.notEqual(res.items, null, "res.items is null")
+          assert.equal(err, null, err);
+          assert.notEqual(res.items, null, "res.items is null");
 
-          done()
+          done();
 
-        })
-      })
-    })
+        });
+      });
+    });
 
     describe('.refunds', function(done){
 
@@ -353,14 +353,14 @@ describe('balanced', function(){
 
         balanced.marketplace.refunds(function(err, res){
 
-          assert.equal(err, null, err)
-          assert.notEqual(res.items, null, "res.items is null")
+          assert.equal(err, null, err);
+          assert.notEqual(res.items, null, "res.items is null");
 
-          done()
+          done();
 
-        })
-      })
-    })
+        });
+      });
+    });
 
     describe('.holds', function(done){
 
@@ -368,14 +368,14 @@ describe('balanced', function(){
 
         balanced.marketplace.holds(function(err, res){
 
-          assert.equal(err, null, err)
+          assert.equal(err, null, err);
 
-          done()
+          done();
 
-        })
-      })
-    })
+        });
+      });
+    });
 
 
-  })
-})
+  });
+});
