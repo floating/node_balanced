@@ -6,10 +6,48 @@ var api_secret = null;
 var marketplace_id = null;
 var balanced = null;
 var test = {};
+var cards = {
+	mastercard:{
+		card_number: "5105105105105100",
+		expiration_month: "12",
+		expiration_year: "2015",
+		security_code: "123"
+	},
+	visa: {
+		card_number: "4111111111111111",
+		expiration_month: "12",
+		expiration_year: "2015",
+		security_code: "123"
+	},
+	amex: {
+		card_number: "341111111111111",
+		expiration_month: "12",
+		expiration_year: "2015",
+		security_code: "1234"
+	},
+	insufficient: { // we'll be unable to place a hold on this card--insufficient funds.
+		card_number: "4444444444444448",
+		expiration_month: "12",
+		expiration_year: "2015",
+		security_code: "123"
+	},
+	canceled: { // we'll be unable to place a hold on this card--canceled
+		card_number: "4222222222222220",
+		expiration_month: "12",
+		expiration_year: "2015",
+		security_code: "123"
+	}
+};
+var bank_accounts = {
+	san_mateo_cu:'321174851',
+	bank_of_america:'122000030',
+	jp_morgan_chase:'021000021'
+};
+
 
 var client = function(method, uri, json, cb) {
 
-  //make json param optional;
+  //make json param optional
   if(typeof json === 'function' && cb === undefined){cb = json; json = null;}
 
   if(api_secret){
@@ -24,7 +62,7 @@ var client = function(method, uri, json, cb) {
     encoding: "utf-8",
     json: json || true
   }, function(err, response, body) {
-    if (response.statusCode >= 400){
+    if (response.statusCode >= 400){ // canceled card will return 402, so allow higher 400 codes.
 
       if(body !== undefined){
         err = new Error("Balanced call failed: "+response.statusCode+" - "+body.response);
@@ -41,11 +79,11 @@ var client = function(method, uri, json, cb) {
 
 before(function(done){
 
-  //create a marketplace;
+  //create a marketplace
   client("POST", "/v1/api_keys", function(err, res){
     if(err){return done(err);}
 
-    //set the api secret;
+    //set the api secret
     api_secret = res.secret;
 
     client("POST", "/v1/marketplaces", function(err, res){
@@ -64,13 +102,8 @@ before(function(done){
           done();
         }
       }
-      //create a card token;
-      client("POST", "/v1/marketplaces/"+marketplace_id+"/cards", {
-        card_number: "5105105105105100",
-        expiration_month: "12",
-        expiration_year: "2015",
-        security_code: "123"
-      }, function(err, res){
+      //create a card token
+      client("POST", "/v1/marketplaces/"+marketplace_id+"/cards", cards.mastercard, function(err, res){
         if(err){
           done(err);
         }else{
@@ -78,7 +111,7 @@ before(function(done){
           track();
         }
       });
-      //create bank token;
+      //create bank token
       client("POST", "/v1/bank_accounts", test.bank_info, function(err, res){
         if(err){
           done(err);
@@ -265,7 +298,7 @@ describe('balanced', function(){
 
     describe('.get', function(done){
 
-      it('should get the deatils for this account', function(done){
+      it('should get the details for this account', function(done){
 
         balanced.account.get(test.account_id, function(err, res){
 
@@ -279,7 +312,7 @@ describe('balanced', function(){
 
     });
 
-    describe('.activity', function(done){
+    describe('.transactions', function(done){
 
       it('should get all the debits/credits this account', function(done){
 
@@ -376,6 +409,80 @@ describe('balanced', function(){
       });
     });
 
+  }); //marketplace
+
+  //CARD
+
+  describe('.card', function(){
+
+    describe('.create', function(done){
+
+      it('should create a card, different from the one we created before', function(done){
+
+        balanced.card.create(cards.visa, function(err, res){
+
+          assert.equal(err, null, err);
+          assert.notEqual(res.id, null, "res.id is null");
+          assert.notEqual(res.hash, null, "res.hash is null");
+          assert.equal(res.is_valid, true, "res.is_valid is true");
+
+          //cache the info in the test object
+		  if (res.id) {
+		  	test.visa = {id:res.id, hash: res.hash};
+		  }
+
+          done();
+
+        });
+      });
+    });
+
+/* Not passing at the moment due to the status code 402
+    describe('.create a canceled card (should throw an error.)', function(done){
+
+      it('should return with an error', function(done){
+
+        balanced.card.create(cards.canceled, function(err, res){
+			console.log(res);
+          assert.equal(err, null, err);
+          assert.equal(res.category_code, 'card-declined', "Card is declined");
+          assert.equal(res.status_code, '402', "402--payment required");
+          done();
+
+        });
+      });
+    });
+*/
+
+    describe('.retrieve', function(done){
+
+      it('should retrieve a card\'s info', function(done){
+
+        balanced.card.retrieve(test.visa.id, function(err, res){
+
+          assert.equal(err, null, err);
+          assert.notEqual(res.id, null, "res.id is null");
+          assert.equal(res.id, test.visa.id, "res.id equals the id we sent");
+          assert.equal(res.is_valid, true, "res.is_valid is true");
+
+          done();
+
+        });
+      });
+    });
+
+/*
+	  list_all: function(cb) { //returns a list of all cards you've created
+	  update: function(card_id, card_info, cb)
+	  invalidate: function(card_id, cb)
+*/
 
   });
+
+  // DEBIT
+
+  // HOLD
+
+  // REFUND
+
 });
