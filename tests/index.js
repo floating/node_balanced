@@ -48,11 +48,11 @@ var bank_accounts = {
 var client = function(method, uri, json, cb) {
 
   //make json param optional
-  if(typeof json === 'function' && cb === undefined){cb = json; json = null;}
+  if (typeof json === 'function' && cb === undefined){cb = json; json = null;}
 
-  if(api_secret){
-    uri = url.format({protocol: "https", host: "api.balancedpayments.com", auth: api_secret+':', pathname: uri});
-  }else{
+  if (api_secret){
+    uri = url.format({protocol: "https", host: "api.balancedpayments.com", auth: api_secret + ':', pathname: uri});
+  } else {
     uri = url.format({protocol: "https", host: "api.balancedpayments.com", pathname: uri});
   }
 
@@ -62,12 +62,12 @@ var client = function(method, uri, json, cb) {
     encoding: "utf-8",
     json: json || true
   }, function(err, response, body) {
-    if (response.statusCode >= 400){ // canceled card will return 402, so allow higher 400 codes.
+    if (response.statusCode >= 500){ // canceled card will return 402, so allow higher 400 codes.
 
-      if(body !== undefined){
-        err = new Error("Balanced call failed: "+response.statusCode+" - "+body.response);
-      }else{
-        err = new Error("Balanced call failed: "+response.statusCode);
+      if (body !== undefined){
+        err = new Error("Balanced call failed: " + response.statusCode + " - " + body.response);
+      } else {
+        err = new Error("Balanced call failed: " + response.statusCode);
       }
     }
 
@@ -81,41 +81,41 @@ before(function(done){
 
   //create a marketplace
   client("POST", "/v1/api_keys", function(err, res){
-    if(err){return done(err);}
+    if (err){return done(err);}
 
     //set the api secret
     api_secret = res.secret;
 
     client("POST", "/v1/marketplaces", function(err, res){
-      if(err){return done(err);}
+      if (err){return done(err);}
 
       marketplace_id = res.id;
 
-      test.email = function(){ return Math.random()+'test@testing.com'; }
+      test.email = function(){ return Math.random() + 'test@testing.com'; }
       test.card_info = {card_number: "5105105105105100", expiration_month: "12", expiration_year: "2020", security_code: "123"}
       test.bank_info = {name: "Johann Bernoulli", account_number: "9900000001", routing_number: "121000358", type: "checking"}
 
       var count = 0;
       var track = function(){
-        if(++count === 2){
+        if ( +  + count === 2){
           balanced = require("../index")(api_secret, marketplace_id);
           done();
         }
       }
       //create a card token
-      client("POST", "/v1/marketplaces/"+marketplace_id+"/cards", cards.mastercard, function(err, res){
-        if(err){
+      client("POST", "/v1/marketplaces/" + marketplace_id + "/cards", cards.mastercard, function(err, res){
+        if (err){
           done(err);
-        }else{
+        } else {
           test.card_id = res.id;
           track();
         }
       });
       //create bank token
       client("POST", "/v1/bank_accounts", test.bank_info, function(err, res){
-        if(err){
+        if (err){
           done(err);
-        }else{
+        } else {
           test.bank_id = res.id;
           track();
         }
@@ -144,7 +144,7 @@ describe('balanced', function(){
           assert.equal(err, null, err);
           assert.notEqual(res.id, null, "account.id is null");
 
-          if(res.id){test.account_id = res.id}
+          if (res.id){test.account_id = res.id}
 
           done();
 
@@ -279,7 +279,7 @@ describe('balanced', function(){
 
         balanced.account.underwrite(test.account_id, {
           type: 'person',
-          phone_number: '+19046281796',
+          phone_number: ' + 19046281796',
           postal_code: '94110',
           street_address: 'Somewhere over the rainbow',
           dob: '1980-01-01' ,

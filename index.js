@@ -9,20 +9,20 @@ module.exports = function(api_secret, marketplace_id) {
   var client = function(method, uri, json, cb) {
 
     //make json param optional
-    if(typeof json === 'function' && cb === undefined){cb = json; json = null;}
+    if (typeof json === 'function' && cb === undefined){cb = json; json = null;}
 
     request({
       method: method,
-      uri: url.format({protocol: "https", host: "api.balancedpayments.com", auth: api_secret+":", pathname: uri}),
+      uri: url.format({protocol: "https", host: "api.balancedpayments.com", auth: api_secret + ":", pathname: uri}),
       encoding: "utf-8",
       json: json || true
     }, function(err, response, body) {
       if (response.statusCode >= 400){
 
-        if(body !== undefined){
-          err = new Error("Balanced call failed: "+response.statusCode+" - "+body.response);
-        }else{
-          err = new Error("Balanced call failed: "+response.statusCode);
+        if (body !== undefined){
+          err = new Error("Balanced call failed: " + response.statusCode + " - " + body.response);
+        } else {
+          err = new Error("Balanced call failed: " + response.statusCode);
         }
       }
 
@@ -38,75 +38,75 @@ module.exports = function(api_secret, marketplace_id) {
       //creates a new balanced account
       create: function(account, cb){
 
-        client("POST", "/v1/marketplaces/"+marketplace_id+"/accounts", account, cb);
+        client("POST", "/v1/marketplaces/" + marketplace_id + "/accounts", account, cb);
 
       },
 
       //adds a card to their account
       add_card: function(account_id, card_info_or_id, cb){
 
-        if(typeof card_info_or_id === "object"){
+        if (typeof card_info_or_id === "object"){
           var card = {card:card_info_or_id};
-        }else{
-          var card = {card_uri:"/v1/marketplaces/"+marketplace_id+"/cards/"+card_info_or_id};
+        } else {
+          var card = {card_uri:"/v1/marketplaces/" + marketplace_id + "/cards/" + card_info_or_id};
         }
 
-        client("PUT", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id, card, cb);
+        client("PUT", "/v1/marketplaces/" + marketplace_id + "/accounts/" + account_id, card, cb);
 
       },
 
       //debits the accounts card
       debit: function(account_id, debit, cb){
 
-        client("POST", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id+"/debits", debit, cb);
+        client("POST", "/v1/marketplaces/" + marketplace_id + "/accounts/" + account_id + "/debits", debit, cb);
 
       },
 
       //puts a hold on the accounts card
       hold: function(account_id, hold, cb){
 
-        client("POST", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id+"/holds", hold, cb);
+        client("POST", "/v1/marketplaces/" + marketplace_id + "/accounts/" + account_id + "/holds", hold, cb);
 
       },
 
       //adds a bank account to this account
       add_bank: function(account_id, bank_info_or_id, cb){
 
-        if(typeof bank_info_or_id === "object"){
+        if (typeof bank_info_or_id === "object"){
           var bank = {bank_account:bank_info_or_id}
-        }else{
-          var bank = {bank_account_uri:"/v1/marketplaces/"+marketplace_id+"/bank_accounts/"+bank_info_or_id}
+        } else {
+          var bank = {bank_account_uri:"/v1/marketplaces/" + marketplace_id + "/bank_accounts/" + bank_info_or_id}
         }
 
-        client("PUT", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id, bank, cb);
+        client("PUT", "/v1/marketplaces/" + marketplace_id + "/accounts/" + account_id, bank, cb);
 
       },
 
       //credits accounts bank account
       credit: function(account_id, credit, cb){
 
-        client("POST", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id+"/credits", credit, cb);
+        client("POST", "/v1/marketplaces/" + marketplace_id + "/accounts/" + account_id + "/credits", credit, cb);
 
       },
 
       //adds extra deatils for underwriting purposes
       underwrite: function(account_id, underwriting_info, cb){
 
-        client("PUT", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id, {merchant: underwriting_info}, cb);
+        client("PUT", "/v1/marketplaces/" + marketplace_id + "/accounts/" + account_id, {merchant: underwriting_info}, cb);
 
       },
 
       //returns account details
       get: function(account_id, cb){
 
-        client("GET", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id, cb);
+        client("GET", "/v1/marketplaces/" + marketplace_id + "/accounts/" + account_id, cb);
 
       },
 
       //returns object of recent credits and debits for the account
       transactions: function(account_id, cb){
 
-        client("GET", "/v1/marketplaces/"+marketplace_id+"/accounts/"+account_id+"/transactions", cb);
+        client("GET", "/v1/marketplaces/" + marketplace_id + "/accounts/" + account_id + "/transactions", cb);
 
       }
     },
@@ -116,35 +116,35 @@ module.exports = function(api_secret, marketplace_id) {
       //returns list of accounts for the marketplace
       accounts: function(cb){
 
-        client("GET", "/v1/marketplaces/"+marketplace_id+"/accounts", cb);
+        client("GET", "/v1/marketplaces/" + marketplace_id + "/accounts", cb);
 
       },
 
       //returns list of debits for the marketplace
       debits: function(cb){
 
-        client("GET", "/v1/marketplaces/"+marketplace_id+"/debits", cb);
+        client("GET", "/v1/marketplaces/" + marketplace_id + "/debits", cb);
 
       },
 
        //returns list of credits for the marketplace
       credits: function(cb){
 
-        client("GET", "/v1/marketplaces/"+marketplace_id+"/credits", cb);
+        client("GET", "/v1/marketplaces/" + marketplace_id + "/credits", cb);
 
       },
 
        //returns list of refunds for the marketplace
       refunds: function(cb){
 
-        client("GET", "/v1/marketplaces/"+marketplace_id+"/refunds", cb);
+        client("GET", "/v1/marketplaces/" + marketplace_id + "/refunds", cb);
 
       },
 
        //returns list of holds for the marketplace
       holds: function(cb){
 
-        client("GET", "/v1/marketplaces/"+marketplace_id+"/holds", cb);
+        client("GET", "/v1/marketplaces/" + marketplace_id + "/holds", cb);
 
       }
 
@@ -174,31 +174,31 @@ module.exports = function(api_secret, marketplace_id) {
 
       create: function(card_info, cb){ //tokenizes a card
 
-        client("POST", "/v1/marketplaces/"+marketplace_id+"/cards", card_info, cb);
+        client("POST", "/v1/marketplaces/" + marketplace_id + "/cards", card_info, cb);
 
       },
 
 	  retrieve: function(card_id, cb) { //retrieves info about one card
 
-		client("GET", "/v1/marketplaces/"+marketplace_id+"/cards/"+card_id, cb);
+		client("GET", "/v1/marketplaces/" + marketplace_id + "/cards/" + card_id, cb);
 
 	  },
 
 	  list_all: function(cb) { //returns a list of all cards you've created
 
-		client("GET", "/v1/marketplaces/"+marketplace_id+"/cards", cb);
+		client("GET", "/v1/marketplaces/" + marketplace_id + "/cards", cb);
 
 	  },
 
 	  update: function(card_id, card_info, cb) { // update some attributes of the card
 
-		client("PUT", "/v1/marketplaces/"+marketplace_id+"/cards/"+card_id, card_info, cb);
+		client("PUT", "/v1/marketplaces/" + marketplace_id + "/cards/" + card_id, card_info, cb);
 
 	  },
 
 	  invalidate: function(card_id, cb) { // mark a card as invalid
 
-		client("PUT", "/v1/marketplaces/"+marketplace_id+"/cards/"+card_id, {is_valid: false}, cb);
+		client("PUT", "/v1/marketplaces/" + marketplace_id + "/cards/" + card_id, {is_valid: false}, cb);
 
 	  }
 
@@ -216,7 +216,7 @@ module.exports = function(api_secret, marketplace_id) {
 			* is required for create/POST;
 
 			amount						integer. If the resolving URI references a hold then this is hold amount. You can always capture less than the hold amount (e.g. a partial capture). Otherwise its the maximum per debit amount for your marketplace. Value must be >= the minimum per debit amount for your marketplace. Value must be <= the maximum per debit amount for your marketplace.
-			appears_on_statement_as		string. Text that will appear on the buyer's statement. Characters are limited to ASCII, digits, and (.<>(){}[]+&!$*;-%_?:#@~='" ^\`|), length <= 22.
+			appears_on_statement_as		string. Text that will appear on the buyer's statement. Characters are limited to ASCII, digits, and (.<>(){}[] + &!$*;-%_?:#@~='" ^\`|), length <= 22.
 			meta						object. Single level mapping from string keys to string values.
 			description					string. Sequence of characters.
 			account_uri					string.
@@ -230,13 +230,13 @@ module.exports = function(api_secret, marketplace_id) {
 		*/
     	create: function (debit_info, cb) {
 
-    	  client("POST", "/v1/marketplaces/"+marketplace_id+"/debits", debit_info, cb);
+    	  client("POST", "/v1/marketplaces/" + marketplace_id + "/debits", debit_info, cb);
 
     	},
 
     	retrieve: function (debit_id, cb) {
 
-    	  client("GET", "/v1/marketplaces/"+marketplace_id+"/debits/"+debit_id, cb);
+    	  client("GET", "/v1/marketplaces/" + marketplace_id + "/debits/" + debit_id, cb);
 
     	},
 
