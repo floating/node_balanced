@@ -97,7 +97,7 @@ before(function(done){
 
       var count = 0;
       var track = function(){
-        if ( +  + count === 2){
+        if (++count === 2){
           balanced = require("../index")(api_secret, marketplace_id);
           done();
         }
@@ -279,7 +279,7 @@ describe('balanced', function(){
 
         balanced.account.underwrite(test.account_id, {
           type: 'person',
-          phone_number: ' + 19046281796',
+          phone_number: '+19046281796',
           postal_code: '94110',
           street_address: 'Somewhere over the rainbow',
           dob: '1980-01-01' ,
