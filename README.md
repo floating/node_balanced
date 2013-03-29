@@ -49,6 +49,13 @@ All methods take a callback as their last parameter, it's called with an error, 
       * `.credits(cb)` - get all of the marketplace's credits
       * `.refunds(cb)` - get all of the marketplace's refunds
       * `.holds(cb)` - get all of the marketplace's holds
+  * `.card`
+      * `.accounts(cb)` - get all of the marketplace's accounts
+      * `.debits(cb)` - get all of the marketplace's debits
+      * `.credits(cb)` - get all of the marketplace's credits
+      * `.refunds(cb)` - get all of the marketplace's refunds
+      * `.holds(cb)` - get all of the marketplace's holds
+
 
 ## Tests
 
