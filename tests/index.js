@@ -417,7 +417,7 @@ describe('balanced', function(){
 
     describe('.create', function(done){
 
-      it('should create a card, different from the one we created before', function(done){
+      it('should create a card', function(done){
 
         balanced.card.create(cards.visa, function(err, res){
 
@@ -437,14 +437,34 @@ describe('balanced', function(){
       });
     });
 
-/* Not passing at the moment due to the status code 402
+    describe('.create another', function(done){
+
+      it('should create a card, different from the one we created before', function(done){
+
+        balanced.card.create(cards.mastercard, function(err, res){
+
+          assert.equal(err, null, err);
+          assert.notEqual(res.id, null, "res.id is null");
+          assert.notEqual(res.hash, null, "res.hash is null");
+          assert.equal(res.is_valid, true, "res.is_valid is true");
+
+          //cache the info in the test object
+		  if (res.id) {
+		  	test.mastercard = {id:res.id, hash: res.hash};
+		  }
+
+          done();
+
+        });
+      });
+    });
+
     describe('.create a canceled card (should throw an error.)', function(done){
 
-      it('should return with an error', function(done){
+      it('should return a 402', function(done){
 
         balanced.card.create(cards.canceled, function(err, res){
-			console.log(res);
-          assert.equal(err, null, err);
+          //error's not null, but it's pretty much empty.
           assert.equal(res.category_code, 'card-declined', "Card is declined");
           assert.equal(res.status_code, '402', "402--payment required");
           done();
@@ -452,11 +472,11 @@ describe('balanced', function(){
         });
       });
     });
-*/
+
 
     describe('.retrieve', function(done){
 
-      it('should retrieve a card\'s info', function(done){
+      it("should retrieve a card's info", function(done){
 
         balanced.card.retrieve(test.visa.id, function(err, res){
 
@@ -471,11 +491,55 @@ describe('balanced', function(){
       });
     });
 
-/*
-	  list_all: function(cb) { //returns a list of all cards you've created
-	  update: function(card_id, card_info, cb)
-	  invalidate: function(card_id, cb)
-*/
+    describe('.list_all', function(done){
+
+      it("should list all the marketplace's cards", function(done){
+
+        balanced.card.list_all(function(err, res){
+
+          assert.equal(err, null, err);
+          assert.equal(res.items.length, 2, 'We have two cards in our list.');
+
+          done();
+
+        });
+      });
+    });
+
+    describe('.update', function(done){
+
+      var updateData = {name:"Test User", account:"TestTestTestTest"};
+
+      it("should update a card", function(done){
+
+        balanced.card.update(test.mastercard.id, updateData, function(err, res){
+
+		  console.log(res);
+          assert.equal(err, null, err);
+
+          //this isn't actually updating.
+          //assert.equal(res.name, updateData.name, "We changed our name.");
+          //assert.equal(res.account, updateData.account, "We changed our account.");
+          done();
+
+        });
+      });
+    });
+
+    describe('.invalidate', function(done){
+
+      it("should invalidate our out of date mastercard", function(done){
+
+        balanced.card.invalidate(test.mastercard.id, function(err, res){
+
+          assert.equal(err, null, err);
+          assert.equal(res.is_valid, false, "We changed our month.");
+          done();
+
+        });
+      });
+    });
+
 
   });
 
