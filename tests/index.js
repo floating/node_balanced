@@ -508,13 +508,12 @@ describe('balanced', function(){
 
     describe('.update', function(done){
 
-      var updateData = {name:"Test User", account:"TestTestTestTest"};
+      var updateData = {name:"Test User"};
 
       it("should update a card", function(done){
 
         balanced.card.update(test.mastercard.id, updateData, function(err, res){
 
-		  console.log(res);
           assert.equal(err, null, err);
 
           //this isn't actually updating.
