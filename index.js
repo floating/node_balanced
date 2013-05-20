@@ -228,9 +228,15 @@ module.exports = function(api_secret, marketplace_id) {
 			card_uri					string. Deprecated This field is deprecated in favour of source_uri.
 
 		*/
-    	create: function (debit_info, cb) {
 
-    	  client("POST", "/v1/marketplaces/" + marketplace_id + "/debits", debit_info, cb);
+    	create: function (params, cb) {
+		  /*
+			params: {account_id: string, debit_info: {object}}
+		  */
+
+    	  console.log({debit_info: params.debit_info});
+
+    	  client("POST", "/v1/marketplaces/" + marketplace_id + "/accounts/" + params.account_id + "/debits", params.debit_info, cb);
 
     	},
 
@@ -242,18 +248,28 @@ module.exports = function(api_secret, marketplace_id) {
 
     	list_all: function (cb) {
 
+    	  client("GET", "/v1/marketplaces/" + marketplace_id + "/debits", cb);
 
     	},
 
     	list_all_in_account: function (account_id, cb) {
 
-    	},
-
-    	update: function (debit_id, cb) {
+			client("GET", "/v1/marketplaces/" + marketplace_id + "/accounts/" + account_id + "/debits", cb);
 
     	},
 
-    	refund: function (cb) {
+    	update: function (params, cb) {
+    		/*
+    			params: {account_id: string, debit_id: string, debit_info: {object}}
+    		*/
+
+			client("PUT", "/v1/marketplaces/" + marketplace_id + "/accounts/" + params.account_id + "/debits/" + params.debit_id, params.debit_info, cb);
+
+    	},
+
+    	refund: function (debit_id, cb) {
+
+			client("POST", "/v1/marketplaces/" + marketplace_id + "/debits/" + params.debit_id + "/refunds", {}, cb);
 
     	}
 
@@ -274,11 +290,24 @@ module.exports = function(api_secret, marketplace_id) {
     	list_all_in_account: function (account_id, cb) {
 
     	},
-    	update: function (hold_id, cb) {},
+    	update: function (hold_id, cb) {
 
-    	capture: function (cb) {},
 
-    	voidHold: function (cb) {}
+
+    	},
+
+    	capture: function (cb) {
+
+
+
+    	},
+
+    	voidHold: function (cb) {
+
+
+
+
+    	}
 
     }, // /hold
 
