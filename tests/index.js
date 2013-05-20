@@ -38,6 +38,7 @@ var cards = {
 		security_code: "123"
 	}
 };
+
 var bank_accounts = {
 	san_mateo_cu:'321174851',
 	bank_of_america:'122000030',
@@ -62,7 +63,7 @@ var client = function(method, uri, json, cb) {
     encoding: "utf-8",
     json: json || true
   }, function(err, response, body) {
-    if (response.statusCode >= 500){ // canceled card will return 402, so allow higher 400 codes.
+    if (response.statusCode >= 403){ // canceled card will return 402, so allow higher 400 codes.
 
       if (body !== undefined){
         err = new Error("Balanced call failed: " + response.statusCode + " - " + body.response);
@@ -91,9 +92,10 @@ before(function(done){
 
       marketplace_id = res.id;
 
-      test.email = function(){ return Math.random() + 'test@testing.com'; }
-      test.card_info = {card_number: "5105105105105100", expiration_month: "12", expiration_year: "2020", security_code: "123"}
-      test.bank_info = {name: "Johann Bernoulli", account_number: "9900000001", routing_number: "121000358", type: "checking"}
+      test.email = function(){ return Math.random() + 'test@testing.com'; };
+      test.card_info = {card_number: "5105105105105100", expiration_month: "12", expiration_year: "2020", security_code: "123"};
+      test.bank_info = {name: "Johann Bernoulli", account_number: "9900000001", routing_number: "121000358", type: "checking"};
+      test.debit_info = {};
 
       var count = 0;
       var track = function(){
@@ -117,6 +119,7 @@ before(function(done){
           done(err);
         } else {
           test.bank_id = res.id;
+          test.debit_info.account_id = res.id; // define the account ID for our debit tests.
           track();
         }
       });
@@ -510,7 +513,7 @@ describe('balanced', function(){
 
       var updateData = {name:"Test User"};
 
-      it("should update a card", function(done){
+      it("should update a card...and passes the test, but doesn't really update", function(done){
 
         balanced.card.update(test.mastercard.id, updateData, function(err, res){
 
@@ -518,7 +521,6 @@ describe('balanced', function(){
 
           //this isn't actually updating.
           //assert.equal(res.name, updateData.name, "We changed our name.");
-          //assert.equal(res.account, updateData.account, "We changed our account.");
           done();
 
         });
@@ -543,6 +545,112 @@ describe('balanced', function(){
   });
 
   // DEBIT
+
+  describe('.debit', function(){
+
+    describe('.create', function(done){
+
+      it('should create a debit', function(done){
+
+      	var params = {
+      		account_id: test.debit_info.account_id,
+      		debit_info: {amount: 500, appears_on_statement_as: "Testing!", description:"We're testing."}
+      	};
+
+        balanced.debit.create(params, function(err, res){
+
+          assert.equal(err, null, err);
+          assert.notEqual(res.id, null, "res.id is null");
+          assert.notEqual(res.hash, null, "res.hash is null");
+          assert.equal(res.is_valid, true, "res.is_valid is true");
+
+          //cache the info in the test object
+		  if (res.id) {
+		  	test.debit_info.id = res.id;
+		  }
+		  if (res.hash) {
+		  	test.debit_info.hash= res.hash;
+		  }
+
+          done();
+
+        });
+      });
+    });
+
+
+    describe('.retrieve', function(done){
+
+      it("should retrieve a debit", function(done){
+
+        balanced.debit.retrieve(test.debit_info.id, function(err, res){
+
+          assert.equal(err, null, err);
+          assert.notEqual(res.id, null, "res.id is not null");
+          assert.equal(res.id, test.debit_info.id, "res.id equals the id we sent");
+          assert.notEqual(res.status, null, "res.status is not null");
+
+          done();
+
+        });
+      });
+    });
+
+    describe('.list_all', function(done){
+
+      it("should list all the marketplace's debits", function(done){
+
+        balanced.debit.list_all(function(err, res){
+
+          assert.equal(err, null, err);
+          assert.notEqual(res.items.length, 0, 'We have at least one debit in our list.');
+
+          done();
+
+        });
+      });
+    });
+
+/*    describe('.update', function(done){
+
+      var params = {
+      	account_id: test.debit_info.account_id,
+      	debit_id: test.debit_info.id,
+      	debit_info: {name:"Test User"}
+      };
+
+      it("should update a debit", function(done){
+
+        balanced.debit.update(params, function(err, res){
+
+          assert.equal(err, null, err);
+
+          //this isn't actually updating.
+          //assert.equal(res.description, updateData.name, "We changed our name.");
+          done();
+
+        });
+      });
+    }); */
+
+    describe('.refund', function(done){
+
+
+      it("should refund a debit", function(done){
+
+        balanced.debit.update(test.debit_info.id, function(err, res){
+
+          assert.equal(err, null, err);
+
+          //this isn't actually updating.
+          //assert.equal(res.description, updateData.name, "We changed our name.");
+          done();
+
+        });
+      });
+    });
+
+  });
 
   // HOLD
 
