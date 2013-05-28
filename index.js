@@ -213,19 +213,6 @@ module.exports = function(api_secret, marketplace_id) {
 			and captured behind the scenes automatically. For ACH debits there is no;
 			corresponding hold.
 
-			* is required for create/POST;
-
-			amount						integer. If the resolving URI references a hold then this is hold amount. You can always capture less than the hold amount (e.g. a partial capture). Otherwise its the maximum per debit amount for your marketplace. Value must be >= the minimum per debit amount for your marketplace. Value must be <= the maximum per debit amount for your marketplace.
-			appears_on_statement_as		string. Text that will appear on the buyer's statement. Characters are limited to ASCII, digits, and (.<>(){}[] + &!$*;-%_?:#@~='" ^\`|), length <= 22.
-			meta						object. Single level mapping from string keys to string values.
-			description					string. Sequence of characters.
-			account_uri					string.
-			on_behalf_of_uri			string. The account of a merchant, usually a seller or service provider, that is associated with this card charge or bank account debit.
-			merchant_uri				string. Deprecated The account of a merchant, usually a seller or service provider, that is associated with this card charge or bank account debit. Deprecated in favour of on_behalf_of_uri.
-			hold_uri					string. If no hold is provided one my be generated and captured if the funding source is a card.
-			source_uri					string. URI of a specific bank account or card to be debited.
-			bank_account_uri			string. Deprecated This field is deprecated in favour of source_uri.
-			card_uri					string. Deprecated This field is deprecated in favour of source_uri.
 
 		*/
 
@@ -233,8 +220,6 @@ module.exports = function(api_secret, marketplace_id) {
 		  /*
 			params: {account_id: string, debit_info: {object}}
 		  */
-
-    	  console.log({debit_info: params.debit_info});
 
     	  client("POST", "/v1/marketplaces/" + marketplace_id + "/accounts/" + params.account_id + "/debits", params.debit_info, cb);
 
@@ -269,7 +254,7 @@ module.exports = function(api_secret, marketplace_id) {
 
     	refund: function (debit_id, cb) {
 
-			client("POST", "/v1/marketplaces/" + marketplace_id + "/debits/" + params.debit_id + "/refunds", {}, cb);
+			client("POST", "/v1/marketplaces/" + marketplace_id + "/debits/" + debit_id + "/refunds", {}, cb);
 
     	}
 
@@ -277,35 +262,64 @@ module.exports = function(api_secret, marketplace_id) {
 
     hold: {
 
-    	create: function (cb) {},
+    	create: function (params, cb) {
+		  /*
+			params: {account_id: string, hold_info: {object}}
+		  */
 
-    	retrieve: function (hold_id, cb) {},
+    	  client("POST", "/v1/marketplaces/" + marketplace_id + "/accounts/" + params.account_id + "/holds", params.hold_info, cb);
 
+    	},
+
+    	retrieve: function (hold_id, cb) {
+
+    	  client("GET", "/v1/marketplaces/" + marketplace_id + "/holds/" + hold_id, cb);
+
+    	},
 
     	list_all: function (cb) {
 
+    	  client("GET", "/v1/marketplaces/" + marketplace_id + "/holds", cb);
 
     	},
 
     	list_all_in_account: function (account_id, cb) {
 
-    	},
-    	update: function (hold_id, cb) {
-
-
+			client("GET", "/v1/marketplaces/" + marketplace_id + "/accounts/" + account_id + "/holds", cb);
 
     	},
 
-    	capture: function (cb) {
+    	update: function (params, cb) {
 
+    		/*
+    			params: {account_id: string, hold_id: string, hold_info: {object}}
+    		*/
+
+			client("PUT", "/v1/marketplaces/" + marketplace_id + "/accounts/" + params.account_id + "/holds/" + params.hold_id, params.hold_info, cb);
 
 
     	},
 
-    	voidHold: function (cb) {
+    	capture: function (params, cb) {
 
+    		/*
+    			creates a debit.
+    			params: {account_id: string, hold_info: {object}}
+    			hold_info should contain at minimum hold_uri
 
+    		*/
 
+			client("POST", "/v1/marketplaces/" + marketplace_id + "/accounts/" + params.account_id + "/debits/", params.hold_info, cb);
+
+    	},
+
+    	voidHold: function (hold_id, cb) {
+
+    		/*
+    			voids a hold.
+    		*/
+
+			client("PUT", "/v1/marketplaces/" + marketplace_id + "/holds/" + hold_id , {}, cb);
 
     	}
 
@@ -313,20 +327,43 @@ module.exports = function(api_secret, marketplace_id) {
 
     refund: {
 
-    	create: function (cb) {},
+    	create: function (params, cb) {
+		  /*
+			params: {account_id: string, refund_info: {object}}
+		  */
 
-    	retrieve: function (refund_id, cb) {},
+    	  client("POST", "/v1/marketplaces/" + marketplace_id + "/accounts/" + params.account_id + "/refunds", params.refund_info, cb);
+
+    	},
+
+    	retrieve: function (refund_id, cb) {
+
+    	  client("GET", "/v1/marketplaces/" + marketplace_id + "/refunds/" + refund_id, cb);
+
+    	},
 
     	list_all: function (cb) {
 
+    	  client("GET", "/v1/marketplaces/" + marketplace_id + "/refunds", cb);
 
     	},
 
     	list_all_in_account: function (account_id, cb) {
 
+			client("GET", "/v1/marketplaces/" + marketplace_id + "/accounts/" + account_id + "/refunds", cb);
+
     	},
 
-    	update: function (refund_id, cb) {}
+    	update: function (params, cb) {
+
+    		/*
+    			params: {account_id: string, refund_id: string, refund_info: {object}}
+    		*/
+
+			client("PUT", "/v1/marketplaces/" + marketplace_id + "/accounts/" + params.account_id + "/refunds/" + params.refund_id, params.refund_info, cb);
+
+
+    	},
 
     } // /refund
 
