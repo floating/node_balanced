@@ -95,8 +95,10 @@ before(function(done){
       test.email = function(){ return Math.random() + 'test@testing.com'; };
       test.card_info = {card_number: "5105105105105100", expiration_month: "12", expiration_year: "2020", security_code: "123"};
       test.bank_info = {name: "Johann Bernoulli", account_number: "9900000001", routing_number: "121000358", type: "checking"};
-      test.debit_info = { id: null };
+      test.debit_info = { id: null, debit_uri: null };
+      test.debit_info_2 = { id: null, debit_uri: null };
       test.hold_info = { id: null };
+      test.refund_info = { id: null };
 
       var count = 0;
       var track = function(){
@@ -561,14 +563,16 @@ describe('balanced', function(){
 
         balanced.debit.create(params, function(err, res){
 
-		  //console.log(res);
           assert.equal(err, null, err);
           assert.notEqual(res.id, null, "res.id is not null");
           assert.equal(res.status, 'succeeded', "res.status is 'succeeded'");
           assert.equal(res.source.is_valid, true, "res.source.is_valid is true");
 
           //cache the id in the test object
-		  	test.debit_info.id = res.id;
+		  	test.debit_info = {
+		  		id: res.id,
+		  		debit_uri: res.hold.debit_uri
+		  	};
 
           done();
 
@@ -581,14 +585,11 @@ describe('balanced', function(){
 
       it("should retrieve a debit", function(done){
 
-		//console.log({test_debit_info: test.debit_info });
-
         balanced.debit.retrieve(test.debit_info.id, function(err, res){
 
           assert.equal(err, null, err);
           assert.notEqual(res.id, null, "res.id is not null");
           assert.equal(res.id, test.debit_info.id, "res.id equals the id we sent");
-          //console.log(res.status);
           assert.notEqual(res.status, null, "res.status is not null");
 
           done();
@@ -648,6 +649,38 @@ describe('balanced', function(){
         });
       });
     });
+
+
+    describe('.create another', function(done){
+
+      it("creates a second debit we'll use for the refunds testing.", function(done){
+
+      	var params = {
+      		account_id: test.account_id,
+      		debit_info: {amount: 500, appears_on_statement_as: "Still Testing!", description:"We're still testing."}
+      	};
+
+        balanced.debit.create(params, function(err, res){
+
+          assert.equal(err, null, err);
+          assert.notEqual(res.id, null, "res.id is not null");
+          assert.equal(res.status, 'succeeded', "res.status is 'succeeded'");
+          assert.equal(res.source.is_valid, true, "res.source.is_valid is true");
+
+          //cache the id in the test object
+		  	test.debit_info_2 = {
+		  		id: res.id,
+				debit_uri: res.hold.debit_uri
+
+		  	};
+
+          done();
+
+        });
+      });
+    });
+
+
 
   });
 
@@ -728,7 +761,7 @@ describe('balanced', function(){
         balanced.hold.update(params, function(err, res){
 
           assert.equal(err, null, err);
-			//console.log(res);
+
 		  //doesn't actually update
           assert.equal(res.description, params.hold_info.description, "We updated the description.");
           done();
@@ -750,7 +783,7 @@ describe('balanced', function(){
         balanced.hold.capture(params, function(err, res){
 
           assert.equal(err, null, err);
-		  //console.log(res);
+
           assert.equal(res.status, 'succeeded', "We captured that hold.");
           done();
 
@@ -766,7 +799,6 @@ describe('balanced', function(){
 
           assert.equal(err, null, err);
 		  //console.log(res);
-
           //assert.equal(res.status, 'succeeded', "We voided that hold.");
           done();
 
@@ -774,7 +806,7 @@ describe('balanced', function(){
       });
     });
   });
-/*
+
   // REFUND
   describe('.refund', function(){
 
@@ -784,20 +816,22 @@ describe('balanced', function(){
 
       	var params = {
       		account_id: test.account_id,
-      		refund_info: {amount: 100, appears_on_statement_as: "Testing!", description:"We're testing."}
+      		refund_info: {
+      			debit_uri: test.debit_info_2.debit_uri
+      		}
       	};
 
         balanced.refund.create(params, function(err, res){
 
+		  //console.log(res);
           assert.equal(err, null, err);
           assert.notEqual(res.id, null, "res.id is not null");
           assert.notEqual(res.created_at, null, "res.created_at is not null");
-          assert.equal(res.source.is_valid, true, "res.source.is_valid is true");
 
           //cache the id in the test object
 		  	test.refund_info = {
 		  		id: res.id,
-		  		refund_uri: res.account.refunds_uri
+		  		refund_uri: res.account.refunds_uri + '/' + res.id
 		  	};
 
           done();
@@ -851,8 +885,6 @@ describe('balanced', function(){
         balanced.refund.update(params, function(err, res){
 
           assert.equal(err, null, err);
-			//console.log(res);
-		  //doesn't actually update
           assert.equal(res.description, params.refund_info.description, "We updated the description.");
           done();
 
@@ -860,6 +892,5 @@ describe('balanced', function(){
       });
     });
   });
-*/
 
 });
