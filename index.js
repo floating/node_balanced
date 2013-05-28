@@ -329,7 +329,10 @@ module.exports = function(api_secret, marketplace_id) {
 
     	create: function (params, cb) {
 		  /*
-			params: {account_id: string, refund_info: {object}}
+			params: {account_id: string, refund_info: {
+					debit_uri: "/v1/marketplaces/:marketplace_id/debits/:debit_id"
+				}
+			}
 		  */
 
     	  client("POST", "/v1/marketplaces/" + marketplace_id + "/accounts/" + params.account_id + "/refunds", params.refund_info, cb);
