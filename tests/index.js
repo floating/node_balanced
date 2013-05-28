@@ -95,7 +95,8 @@ before(function(done){
       test.email = function(){ return Math.random() + 'test@testing.com'; };
       test.card_info = {card_number: "5105105105105100", expiration_month: "12", expiration_year: "2020", security_code: "123"};
       test.bank_info = {name: "Johann Bernoulli", account_number: "9900000001", routing_number: "121000358", type: "checking"};
-      test.debit_info = {};
+      test.debit_info = { id: null };
+      test.hold_info = { id: null };
 
       var count = 0;
       var track = function(){
@@ -119,7 +120,6 @@ before(function(done){
           done(err);
         } else {
           test.bank_id = res.id;
-          test.debit_info.account_id = res.id; // define the account ID for our debit tests.
           track();
         }
       });
@@ -511,16 +511,18 @@ describe('balanced', function(){
 
     describe('.update', function(done){
 
-      var updateData = {name:"Test User"};
 
       it("should update a card...and passes the test, but doesn't really update", function(done){
+
+	    var updateData = {description:"Test User"};
 
         balanced.card.update(test.mastercard.id, updateData, function(err, res){
 
           assert.equal(err, null, err);
 
-          //this isn't actually updating.
-          //assert.equal(res.name, updateData.name, "We changed our name.");
+          //this isn't actually updating data yet.
+		  //console.log(res);
+          //assert.equal(res.customer, updateData.customer, "We changed our name.");
           done();
 
         });
@@ -553,24 +555,20 @@ describe('balanced', function(){
       it('should create a debit', function(done){
 
       	var params = {
-      		account_id: test.debit_info.account_id,
+      		account_id: test.account_id,
       		debit_info: {amount: 500, appears_on_statement_as: "Testing!", description:"We're testing."}
       	};
 
         balanced.debit.create(params, function(err, res){
 
+		  //console.log(res);
           assert.equal(err, null, err);
-          assert.notEqual(res.id, null, "res.id is null");
-          assert.notEqual(res.hash, null, "res.hash is null");
-          assert.equal(res.is_valid, true, "res.is_valid is true");
+          assert.notEqual(res.id, null, "res.id is not null");
+          assert.equal(res.status, 'succeeded', "res.status is 'succeeded'");
+          assert.equal(res.source.is_valid, true, "res.source.is_valid is true");
 
-          //cache the info in the test object
-		  if (res.id) {
+          //cache the id in the test object
 		  	test.debit_info.id = res.id;
-		  }
-		  if (res.hash) {
-		  	test.debit_info.hash= res.hash;
-		  }
 
           done();
 
@@ -583,11 +581,14 @@ describe('balanced', function(){
 
       it("should retrieve a debit", function(done){
 
+		//console.log({test_debit_info: test.debit_info });
+
         balanced.debit.retrieve(test.debit_info.id, function(err, res){
 
           assert.equal(err, null, err);
           assert.notEqual(res.id, null, "res.id is not null");
           assert.equal(res.id, test.debit_info.id, "res.id equals the id we sent");
+          //console.log(res.status);
           assert.notEqual(res.status, null, "res.status is not null");
 
           done();
@@ -611,39 +612,37 @@ describe('balanced', function(){
       });
     });
 
-/*    describe('.update', function(done){
-
-      var params = {
-      	account_id: test.debit_info.account_id,
-      	debit_id: test.debit_info.id,
-      	debit_info: {name:"Test User"}
-      };
+    describe('.update', function(done){
 
       it("should update a debit", function(done){
+
+		  var params = {
+			account_id: test.account_id,
+			debit_id: test.debit_info.id,
+			debit_info: {name:"Test User"}
+		  };
 
         balanced.debit.update(params, function(err, res){
 
           assert.equal(err, null, err);
 
-          //this isn't actually updating.
-          //assert.equal(res.description, updateData.name, "We changed our name.");
+          assert.equal(res.source.name, params.name, "We changed our name.");
           done();
 
         });
       });
-    }); */
+    });
 
     describe('.refund', function(done){
 
 
       it("should refund a debit", function(done){
 
-        balanced.debit.update(test.debit_info.id, function(err, res){
+        balanced.debit.refund(test.debit_info.id, function(err, res){
 
           assert.equal(err, null, err);
+          assert.notEqual(res.status, 'succeeded', "res.status is 'succeeded'");
 
-          //this isn't actually updating.
-          //assert.equal(res.description, updateData.name, "We changed our name.");
           done();
 
         });
@@ -654,6 +653,213 @@ describe('balanced', function(){
 
   // HOLD
 
+  describe('.hold', function(){
+
+    describe('.create', function(done){
+
+      it('should create a hold', function(done){
+
+      	var params = {
+      		account_id: test.account_id,
+      		hold_info: {amount: 500, appears_on_statement_as: "Testing!", description:"We're testing."}
+      	};
+
+        balanced.hold.create(params, function(err, res){
+
+          assert.equal(err, null, err);
+          assert.notEqual(res.id, null, "res.id is not null");
+          assert.notEqual(res.created_at, null, "res.created_at is not null");
+          assert.equal(res.source.is_valid, true, "res.source.is_valid is true");
+
+          //cache the id in the test object
+		  	test.hold_info = {
+		  		id: res.id,
+		  		hold_uri: res.account.holds_uri
+		  	};
+
+          done();
+
+        });
+      });
+    });
+
+
+    describe('.retrieve', function(done){
+
+      it("should retrieve a hold", function(done){
+
+        balanced.hold.retrieve(test.hold_info.id, function(err, res){
+
+          assert.equal(err, null, err);
+          assert.notEqual(res.id, null, "res.id is not null");
+          assert.equal(res.id, test.hold_info.id, "res.id equals the id we sent");
+
+          done();
+
+        });
+      });
+    });
+
+    describe('.list_all', function(done){
+
+      it("should list all the marketplace's holds", function(done){
+
+        balanced.hold.list_all(function(err, res){
+
+          assert.equal(err, null, err);
+          assert.notEqual(res.items.length, 0, 'We have at least one hold in our list.');
+
+          done();
+
+        });
+      });
+    });
+
+    describe('.update', function(done){
+
+      it("should update a hold", function(done){
+
+		  var params = {
+			account_id: test.account_id,
+			hold_id: test.hold_info.id,
+			hold_info: {description:"This is my updated hold!"}
+		  };
+
+        balanced.hold.update(params, function(err, res){
+
+          assert.equal(err, null, err);
+			//console.log(res);
+		  //doesn't actually update
+          assert.equal(res.description, params.hold_info.description, "We updated the description.");
+          done();
+
+        });
+      });
+    });
+
+
+    describe('.capture', function(done){
+
+      it("should capture a hold", function(done){
+
+		  var params = {
+			account_id: test.account_id,
+			hold_info: {hold_uri: test.hold_info.hold_uri + '/' + test.hold_info.id }
+		  };
+
+        balanced.hold.capture(params, function(err, res){
+
+          assert.equal(err, null, err);
+		  //console.log(res);
+          assert.equal(res.status, 'succeeded', "We captured that hold.");
+          done();
+
+        });
+      });
+    });
+
+    describe('.void', function(done){
+
+      it("should void a hold", function(done){
+
+        balanced.hold.voidHold(test.hold_info.id, function(err, res){
+
+          assert.equal(err, null, err);
+		  //console.log(res);
+
+          //assert.equal(res.status, 'succeeded', "We voided that hold.");
+          done();
+
+        });
+      });
+    });
+  });
+/*
   // REFUND
+  describe('.refund', function(){
+
+    describe('.create', function(done){
+
+      it('should create a refund', function(done){
+
+      	var params = {
+      		account_id: test.account_id,
+      		refund_info: {amount: 100, appears_on_statement_as: "Testing!", description:"We're testing."}
+      	};
+
+        balanced.refund.create(params, function(err, res){
+
+          assert.equal(err, null, err);
+          assert.notEqual(res.id, null, "res.id is not null");
+          assert.notEqual(res.created_at, null, "res.created_at is not null");
+          assert.equal(res.source.is_valid, true, "res.source.is_valid is true");
+
+          //cache the id in the test object
+		  	test.refund_info = {
+		  		id: res.id,
+		  		refund_uri: res.account.refunds_uri
+		  	};
+
+          done();
+
+        });
+      });
+    });
+
+
+    describe('.retrieve', function(done){
+
+      it("should retrieve a refund", function(done){
+
+        balanced.refund.retrieve(test.refund_info.id, function(err, res){
+
+          assert.equal(err, null, err);
+          assert.notEqual(res.id, null, "res.id is not null");
+          assert.equal(res.id, test.refund_info.id, "res.id equals the id we sent");
+
+          done();
+
+        });
+      });
+    });
+
+    describe('.list_all', function(done){
+
+      it("should list all the marketplace's refunds", function(done){
+
+        balanced.refund.list_all(function(err, res){
+
+          assert.equal(err, null, err);
+          assert.notEqual(res.items.length, 0, 'We have at least one refund in our list.');
+
+          done();
+
+        });
+      });
+    });
+
+    describe('.update', function(done){
+
+      it("should update a refund", function(done){
+
+		  var params = {
+			account_id: test.account_id,
+			refund_id: test.refund_info.id,
+			refund_info: {description:"This is my updated refund!"}
+		  };
+
+        balanced.refund.update(params, function(err, res){
+
+          assert.equal(err, null, err);
+			//console.log(res);
+		  //doesn't actually update
+          assert.equal(res.description, params.refund_info.description, "We updated the description.");
+          done();
+
+        });
+      });
+    });
+  });
+*/
 
 });
