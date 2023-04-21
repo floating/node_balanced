@@ -56,11 +56,11 @@ Install mocha with `npm install mocha -g`, then run `npm test`.
 
 ## Author
 
-C. Jordan Muir (cjm712@gmail.com), development sponsored by [HashPay](https://hashpay.com/).
+Jordan Muir, development sponsored by [HashPay](https://hashpay.com/).
 
 ## License
 
-Copyright (C) 2012 C. Jordan Muir
+Copyright (C) 2012 Jordan Muir
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
