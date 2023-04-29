@@ -294,6 +294,25 @@ describe('balanced', function(){
       })
     })
 
+    describe('.assets', function(done){
+
+      it('should get all the cards/bank accounts for this account', function(done){
+
+        balanced.account.assets(test.account_id, function(err, res){
+
+          assert.notEqual(res.cards, null, "res.cards is null")
+          assert.notEqual(res.bank_accounts, null, "res.bank_accounts is null")
+          assert.equal(res.cards.length > 0, true, "res.cards doesn't have any content")
+          assert.equal(res.bank_accounts.length > 0, true, "res.bank_accounts doesn't have any content")
+
+          done()
+
+        })
+
+      })
+
+    })
+
   })
 
 
